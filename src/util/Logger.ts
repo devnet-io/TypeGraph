@@ -1,6 +1,6 @@
 /* tslint:disable:no-console */
 
-import * as lodash from 'lodash';
+import { get as lodashGet } from 'lodash';
 
 import dictionary from './dictionary';
 import { currentMode, Mode } from './Mode';
@@ -16,7 +16,7 @@ export default class Logger {
 	private static PREFIX: string = "TypeGraph - ";
 
 	public static getMessage(key: string): string {
-		const message: string = lodash.get(dictionary, key);
+		const message: string = lodashGet(dictionary, key);
 
 		if(typeof message !== "undefined") {
 			return Logger.PREFIX + message;

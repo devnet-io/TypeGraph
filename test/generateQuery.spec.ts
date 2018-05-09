@@ -59,4 +59,17 @@ describe("Query Generator", () => {
 		expect(queryManyParams).toEqual("{companies(foo:\"bar\",count:3,enabled:true){id,name,industry{id,fieldOne}}}");
 
 	});
+
+	it("invalid class throws error", () => {
+		expect(() => {
+			generateQuery(undefined, QueryType.MANY);
+		}).toThrow();
+	});
+
+	it("invalid query type throws error", () => {
+		expect(() => {
+			generateQuery(TestClass, undefined);
+		}).toThrow();
+	});
+
 });
