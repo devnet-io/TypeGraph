@@ -34,13 +34,13 @@ class Company {
 You can get the query as a string using the generateQuery function.
 
 #### One
-```js
+```ts
 import { generateQuery, QueryType } from 'typegraph';
 
 const queryOne: string = generateQuery(Company, QueryType.ONE);
 ```
 Produces:
-```json
+```
 { 
     company {
         id
@@ -50,13 +50,13 @@ Produces:
 }
 ```
 #### Many
-```js
+```ts
 import { generateQuery, QueryType } from 'typegraph';
 
 const queryMany: string = generateQuery(Company, QueryType.MANY);
 ```
 Produces:
-```json
+```
 {
     companies {
         id
@@ -66,13 +66,13 @@ Produces:
 }
 ```
 #### With Params
-```js
+```ts
 import { generateQuery, QueryType } from 'typegraph';
 
 const queryOneWithProps: string = generateQuery(Company, QueryType.ONE, {name: "doge", industry: "dogs"});
 ```
 Produces:
-```json
+```
 {
     company(name: "doge", industry: "dogs") {
         id
