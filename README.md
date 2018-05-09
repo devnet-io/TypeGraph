@@ -1,11 +1,7 @@
-A library for combining TypeScript classes and GraphQL queries.
-
-!> Note: this library is under active development, breaking changes may occur
+!> **Note: this library is under active development, breaking changes may occur**
 
 # TypeGraph
-TypeGraph eliminates the need to write both GraphQL queries and TypeScript interfaces to describe query results by generating GraphQL queries from decorated classes.
-
-[image]
+TypeGraph generates GraphQL queries from decorated TypeScript classes, eliminating the need to write both queries to get data and interfaces to describe the results.
 
 ## Getting Started
 
@@ -37,33 +33,53 @@ class Company {
 ### Getting the query
 You can get the query as a string using the generateQuery function.
 
-
+#### One
 ```js
-    import { generateQuery } from 'typegraph';
+import { generateQuery, QueryType } from 'typegraph';
 
-    const queryOne: string = generateQuery(Company, QueryType.ONE);
-
-    /* company {
+const queryOne: string = generateQuery(Company, QueryType.ONE);
+```
+Produces:
+```json
+{ 
+    company {
         id
         name
         industry
-    } */
+    }
+}
+```
+#### Many
+```js
+import { generateQuery, QueryType } from 'typegraph';
 
-    const queryMany: string = generateQuery(Company, QueryType.MANY);
-
-    /* companies {
+const queryMany: string = generateQuery(Company, QueryType.MANY);
+```
+Produces:
+```json
+{
+    companies {
         id
         name
         industry
-    } */
+    }
+}
+```
+#### With Params
+```js
+import { generateQuery, QueryType } from 'typegraph';
 
-    const queryOneWithProps: string = generateQuery(Company, QueryType.ONE, {name: "doge", industry: "dogs"});
-
-    /* company(name: "doge", industry: "dogs") {
+const queryOneWithProps: string = generateQuery(Company, QueryType.ONE, {name: "doge", industry: "dogs"});
+```
+Produces:
+```json
+{
+    company(name: "doge", industry: "dogs") {
         id
         name
         industry
-    } */
+    }
+}
 ```
 
 ## Upcoming improvements
