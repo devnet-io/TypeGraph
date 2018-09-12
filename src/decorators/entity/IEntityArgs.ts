@@ -8,4 +8,7 @@
 export interface IEntityArgs {
 	one?: string;
 	many?: string;
+	create?: string;
+	update?: string;
+	delete?: string;
 }

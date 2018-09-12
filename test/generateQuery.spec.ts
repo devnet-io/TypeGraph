@@ -32,7 +32,7 @@ describe("Query Generator", () => {
 
 		const queryOne = generateQuery(TestClass, QueryType.ONE);
 		console.log(queryOne);
-		expect(queryOne).toEqual("{company{id,name,industry{id,fieldOne}}}");
+		expect(queryOne).toEqual("query{company{id,name,industry{id,fieldOne}}}");
 
 	});
 
@@ -40,7 +40,7 @@ describe("Query Generator", () => {
 
 		const queryMany = generateQuery(TestClass, QueryType.MANY);
 		console.log(queryMany);
-		expect(queryMany).toEqual("{companies{id,name,industry{id,fieldOne}}}");
+		expect(queryMany).toEqual("query{companies{id,name,industry{id,fieldOne}}}");
 
 	});
 
@@ -48,7 +48,16 @@ describe("Query Generator", () => {
 
 		const queryOneParams = generateQuery(TestClass, QueryType.ONE, {foo: "bar"});
 		console.log(queryOneParams);
-		expect(queryOneParams).toEqual("{company(foo:\"bar\"){id,name,industry{id,fieldOne}}}");
+		expect(queryOneParams).toEqual("query{company(foo:\"bar\"){id,name,industry{id,fieldOne}}}");
+
+	});
+
+	it("query one params alias", () => {
+
+		// alias "data"
+		const queryOneParams = generateQuery(TestClass, QueryType.ONE, {foo: "bar"}, "data");
+		console.log(queryOneParams);
+		expect(queryOneParams).toEqual("query{data:company(foo:\"bar\"){id,name,industry{id,fieldOne}}}");
 
 	});
 
@@ -56,7 +65,16 @@ describe("Query Generator", () => {
 
 		const queryManyParams = generateQuery(TestClass, QueryType.MANY, {foo: "bar", count: 3, enabled: true});
 		console.log(queryManyParams);
-		expect(queryManyParams).toEqual("{companies(foo:\"bar\",count:3,enabled:true){id,name,industry{id,fieldOne}}}");
+		expect(queryManyParams).toEqual("query{companies(foo:\"bar\",count:3,enabled:true){id,name,industry{id,fieldOne}}}");
+
+	});
+
+	it("query many params alias", () => {
+
+		// alias "data"
+		const queryManyParams = generateQuery(TestClass, QueryType.MANY, {foo: "bar", count: 3, enabled: true}, "data");
+		console.log(queryManyParams);
+		expect(queryManyParams).toEqual("query{data:companies(foo:\"bar\",count:3,enabled:true){id,name,industry{id,fieldOne}}}");
 
 	});
 

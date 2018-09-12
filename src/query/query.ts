@@ -3,7 +3,7 @@ import graphqlify from 'graphqlify';
 import Class from '../util/Class';
 import Logger from '../util/Logger';
 import { currentMode } from "../util/Mode";
-import { nDef } from '../util/TypeUtils';
+import { iDef, nDef } from '../util/TypeUtils';
 
 /**
  * Core functionality of the library.
@@ -14,7 +14,17 @@ import { nDef } from '../util/TypeUtils';
 
 export const QUERY: string = "__query__";
 
-export enum QueryType { ONE, MANY, INLINE }
+export enum QueryType { 
+	ONE = "one", 
+	MANY = "many",
+	INLINE = "inline"
+}
+
+export enum MutationType { 
+	CREATE = "create", 
+	UPDATE = "update", 
+	DELETE = "delete" 
+}
 
 export const setupQuery = (cls: any) => {
 	if (nDef(cls[QUERY])) {
@@ -24,15 +34,49 @@ export const setupQuery = (cls: any) => {
 	return false;
 };
 
-export const generateQuery = (clazz: Class, type: QueryType, params?: object, depth: number = 0): string => {
+export const generateMutation = (clazz: Class, type: MutationType, fields: object, params?: object, alias?: string): string => {
 	const instance = new clazz();
-	const query: any = { fields: { } as any};
+
+	if(Object.values(MutationType).indexOf(type) < 0) {
+		Logger.throw("invalid.mutation");
+	}
+
+	if (typeof instance === 'object' && typeof instance[QUERY] === 'object') {
+		const args = instance[QUERY] as any;
+		const name = iDef(alias) ? alias + ":" + args[type] : args[type];
+
+		// construct the query
+		const query = {
+			[name] : { 
+				fields
+			}
+		} as any;
+
+		// add the params if received
+		if (iDef(params)) {
+			query[name].params = params;
+		}
+
+		// pass it graphqlify then prefix
+		return "mutation" + graphqlify(query);
+	}
+
+	Logger.throw("invalid.class");
+};
+
+export const generateQuery = (clazz: Class, type: QueryType, params?: object, alias?: string, depth: number = 0): string => {
+	const instance = new clazz();
+	let query: any = { fields: { } as any};
 	depth++;
+
+	if(Object.values(QueryType).indexOf(type) < 0) {
+		Logger.throw("invalid.query");
+	}
 
 	if (typeof instance === 'object' && typeof instance[QUERY] === 'object') {
 		const args = instance[QUERY] as any;
 
-		if (typeof params !== 'undefined') {
+		if (iDef(params)) {
 			query.params = params;
 		}
 
@@ -42,7 +86,7 @@ export const generateQuery = (clazz: Class, type: QueryType, params?: object, de
 			if (depth < 10 || typeof f.entity === 'undefined') {
 
 				if (typeof f.entity !== 'undefined') {
-					query.fields[f.name] = generateQuery(f.entity, QueryType.INLINE, undefined, depth);
+					query.fields[f.name] = generateQuery(f.entity, QueryType.INLINE, undefined, undefined, depth);
 				} else {
 					query.fields[f.name] = {};
 				}
@@ -52,18 +96,23 @@ export const generateQuery = (clazz: Class, type: QueryType, params?: object, de
 			}
 		});
 
-		if (type === QueryType.INLINE) {
+		/* if(iDef(alias)) {
+			query.field = alias;
+		} */
+
+		if (QueryType.INLINE === type) {
 			// keep as object for use in parent query
 			return query;
-		} else if (type === QueryType.ONE) {
-			// create one query
-			return graphqlify({ [args.one]: query });
-		} else if (type === QueryType.MANY) {
-			// create many query
-			return graphqlify({ [args.many]: query });
 		}
-		
-		Logger.throw("invalid.type");
+
+		// alias the query if needed
+		const name = iDef(alias) ? alias + ":" + args[type] : args[type];
+
+		// create the final query object
+		query = { [name]: query };
+
+		// pass it graphqlify then prefix
+		return "query" + graphqlify(query);
 	}
 
 	Logger.throw("invalid.class");

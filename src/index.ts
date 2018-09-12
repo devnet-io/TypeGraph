@@ -7,4 +7,4 @@
 
 export { default as Entity } from './decorators/entity/Entity';
 export { default as Field } from './decorators/field/Field';
-export { generateQuery, QueryType } from './query/query';
+export { generateQuery, QueryType, generateMutation, MutationType } from './query/query';

@@ -11,7 +11,8 @@ const dictionary: any = {
 		field: "Invalid arguments provided to @Field decorator. See: https://www.devnet.io/libs/TypeGraph/ for valid arguments."
 	},
 	invalid : {
-		type: "Invalid QueryType provided to generateQuery. See: https://www.devnet.io/libs/TypeGraph/ for valid types.",
+		query: "Invalid QueryType provided to generateQuery. See: https://www.devnet.io/libs/TypeGraph/ for valid types.",
+		mutation: "Invalid MutationType provided to generateMutation. See: https://www.devnet.io/libs/TypeGraph/ for valid types.",
 		class: "Invalid class supplied. Is it decorated with @Entity and at least one @Field?"
 	}
 };
