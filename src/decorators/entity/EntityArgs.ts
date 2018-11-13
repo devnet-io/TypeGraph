@@ -1,10 +1,11 @@
 import Logger from '../../util/Logger';
+import { isValidParams, ParamResolver } from '../../util/Params';
 import { IEntityArgs } from './IEntityArgs';
 
 /**
  * Parses and validates the common arguments object passed to {@link Entity}
  * For full documentation: {@link https://www.devnet.io/libs/TypeGraph/}
- * 
+ *
  * @author Joe Esposito <joe@devnet.io>
  */
 
@@ -12,9 +13,14 @@ export default class EntityArgs {
 	private static validFields = ["one", "many", "create", "update", "delete"];
 
 	public static isValid(args: any): boolean {
-		
+
 		const errors = Object.keys(args).reduce((previous, field) => {
-			
+
+			// params is allowed
+			if (field === "params" && isValidParams(args[field])) {
+				return previous;
+			}
+
 			// only a certain set of fields are allowed
 			if(EntityArgs.validFields.indexOf(field) < 0) {
 				return previous += ("," + field);
@@ -27,6 +33,8 @@ export default class EntityArgs {
 
 			return previous;
 		}, "");
+
+	 Logger.warn(errors);
 
 		return errors.length <= 0;
 	}
@@ -47,10 +55,12 @@ export default class EntityArgs {
 	public create?: string | undefined;
 	public update?: string | undefined;
 	public delete?: string | undefined;
+	public params?: ParamResolver | undefined;
 
-	constructor(one?: string, many?: string) {
+	constructor(one?: string, many?: string, params?: ParamResolver) {
 		this.one = one;
 		this.many = many;
+		this.params = params;
 	}
 
 	public isValid(): boolean {

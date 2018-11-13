@@ -1,142 +1,116 @@
+// tslint:disable: no-console max-classes-per-file
+
 import Entity from "../src/decorators/entity/Entity";
 import Field from "../src/decorators/field/Field";
 import { generateMutation, MutationType } from '../src/query/query';
+import { addEnum, addVariable } from "../src/util/Variables";
 
 @Entity({ create: "createCompany", update: "updateCompany", delete: "deleteCompany" })
-class TestClass {
+class ActionResult {
 
 	@Field()
-	public id: number;
+	public entityId: string;
 
 	@Field()
-	public name: string;
+	public operationPerformed: MutationType;
 
 }
 
+@Entity({ create: "createCompany", update: "updateCompany", delete: "deleteCompany", params: (paramData: any) => ({name: paramData.name}) })
+class ActionResultWithCreateParams {
+
+	@Field()
+	public entityId: string;
+
+	@Field()
+	public operationPerformed: MutationType;
+
+}
+
+@Entity({ create: "createCompany", update: "updateCompany", delete: "deleteCompany", params: { someVariable: addVariable("myVar", "String", false, "asdf") } })
+class ActionResultWithVars {
+
+	@Field()
+	public entityId: string;
+
+	@Field({
+		params: {
+			secondVariable: addVariable("secondVariable", "Boolean", true),
+			enumParam: addEnum("MY_ENUM")
+		}
+	})
+	public operationPerformed: MutationType;
+
+}
+
+
 describe("Mutation Generator", () => {
 	it("mutate create", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
 
-		const mutationCreate = generateMutation(TestClass, MutationType.CREATE, fields);
+		const mutationCreate = generateMutation(ActionResult, MutationType.CREATE);
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{createCompany{entityId,operationPerformed}}");
+		expect(mutationCreate).toEqual("mutation { createCompany { entityId operationPerformed } }");
 	});
 
 	it("mutate create params", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
 
-		const params = {payload: {id: 3, name: "test"}};
+		const params = {name: "test"};
 
-		const mutationCreate = generateMutation(TestClass, MutationType.CREATE, fields, params);
-		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{createCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
+	 const mutationCreate = generateMutation(ActionResultWithCreateParams, MutationType.CREATE, params);
+	 console.log(mutationCreate);
+	 expect(mutationCreate).toEqual("mutation { createCompany (name: \"test\") { entityId operationPerformed } }");
 	});
 
-	it("mutate create params alias", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
+ it("mutate create params alias", () => {
 
-		const params = {payload: {id: 3, name: "test"}};
+		const params = {name: "test"};
 
-		// alias "data"
-		const mutationCreate = generateMutation(TestClass, MutationType.CREATE, fields, params, "data");
+		const mutationCreate = generateMutation(ActionResultWithCreateParams, MutationType.CREATE, params, "data");
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{data:createCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
+		expect(mutationCreate).toEqual("mutation { data: createCompany (name: \"test\") { entityId operationPerformed } }");
 	});
 
-	it("mutate update", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
+ it("mutate update params", () => {
+		const params = {name: "test"};
 
-		const mutationCreate = generateMutation(TestClass, MutationType.UPDATE, fields);
+		const mutationCreate = generateMutation(ActionResultWithCreateParams, MutationType.UPDATE, params);
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{updateCompany{entityId,operationPerformed}}");
+		expect(mutationCreate).toEqual("mutation { updateCompany (name: \"test\") { entityId operationPerformed } }");
 	});
 
-	it("mutate update params", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
+ it("mutate update params alias", () => {
+		const params = {name: "test"};
 
-		const params = {payload: {id: 3, name: "test"}};
-
-		const mutationCreate = generateMutation(TestClass, MutationType.UPDATE, fields, params);
+		const mutationCreate = generateMutation(ActionResultWithCreateParams, MutationType.UPDATE, params, "data");
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{updateCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
+		expect(mutationCreate).toEqual("mutation { data: updateCompany (name: \"test\") { entityId operationPerformed } }");
 	});
 
-	it("mutate update params alias", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
+ it("mutate delete", () => {
+		const params = {name: "test"};
 
-		const params = {payload: {id: 3, name: "test"}};
-
-		// alias "data"
-		const mutationCreate = generateMutation(TestClass, MutationType.UPDATE, fields, params, "data");
+		const mutationCreate = generateMutation(ActionResultWithCreateParams, MutationType.DELETE, params);
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{data:updateCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
+		expect(mutationCreate).toEqual("mutation { deleteCompany (name: \"test\") { entityId operationPerformed } }");
 	});
 
-	it("mutate delete", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
+ it("mutate with variables", () => {
+		const mutationCreate = generateMutation(ActionResultWithVars, MutationType.CREATE);
 
-		const mutationCreate = generateMutation(TestClass, MutationType.DELETE, fields);
 		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{deleteCompany{entityId,operationPerformed}}");
+
+		expect(mutationCreate).toEqual("mutation ($myVar: String = \"asdf\", $secondVariable: Boolean!) { createCompany (someVariable: $myVar) { entityId operationPerformed (secondVariable: $secondVariable, enumParam: MY_ENUM) } }");
 	});
 
-	it("mutate delete params", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
-
-		const params = {payload: {id: 3, name: "test"}};
-
-		const mutationCreate = generateMutation(TestClass, MutationType.DELETE, fields, params);
-		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{deleteCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
-	});
-
-	it("mutate delete params alias", () => {
-		const fields = {
-			entityId: {},
-			operationPerformed: {}
-		};
-
-		const params = {payload: {id: 3, name: "test"}};
-
-		// alias "data"
-		const mutationCreate = generateMutation(TestClass, MutationType.DELETE, fields, params, "data");
-		console.log(mutationCreate);
-		expect(mutationCreate).toEqual("mutation{data:deleteCompany(payload:{id:3,name:\"test\"}){entityId,operationPerformed}}");
-	});
-
-	it("invalid class throws error", () => {
+ it("invalid class throws error", () => {
 		expect(() => {
 			generateMutation(undefined, MutationType.CREATE, {});
 		}).toThrow();
 	});
 
-	it("invalid query type throws error", () => {
+ it("invalid query type throws error", () => {
 		expect(() => {
-			generateMutation(TestClass, undefined, {});
+			generateMutation(ActionResult, undefined, {});
 		}).toThrow();
 	});
 });

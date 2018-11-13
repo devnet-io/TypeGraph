@@ -1,10 +1,11 @@
 import Logger from '../../util/Logger';
+import { ParamResolver } from '../../util/Params';
 import { IFieldArgs } from './IFieldArgs';
 
 /**
  * Parses and validates the common arguments object passed to {@link Field} decorator
  * For full documentation: {@link https://www.devnet.io/libs/TypeGraph/}
- * 
+ *
  * @author Joe Esposito <joe@devnet.io>
  */
 
@@ -12,34 +13,40 @@ export default class FieldArgs implements IFieldArgs {
 
 	public static isValid(args: any): boolean {
 		return typeof args === 'undefined' || (typeof args === 'object' && (
-			(typeof args.alias === 'undefined' || typeof args.alias === 'string') &&
+			(typeof args.aliasFor === 'undefined' || typeof args.aliasFor === 'string') &&
+			(typeof args.directive === 'undefined' || typeof args.directive === 'string') &&
 			(typeof args.entity === 'undefined' || typeof args.entity === 'function') &&
+			(typeof args.params === 'undefined' || typeof args.params === 'object' || typeof args.params === 'function') &&
 			(typeof args.query === 'undefined' || typeof args.query === 'string')
 		));
 	}
 
-	public static parseArgs(params: any, thow: boolean = true): FieldArgs {
+	public static parseArgs(args: any, thow: boolean = true): FieldArgs {
 
-		if (thow && !FieldArgs.isValid(params)) {
+		if (thow && !FieldArgs.isValid(args)) {
 			Logger.throw("arguments.field"); // id is essential, throw error instead of logging it
 		}
 
-		if (typeof params === 'undefined') { // id from string
+		if (typeof args === 'undefined') { // id from string
 			return new FieldArgs();
 		}
 
-		if (typeof params === 'object') {
-			return new FieldArgs(params.alias, params.entity, params.query);
-		}		
+		if (typeof args === 'object') {
+			return new FieldArgs(args.aliasFor, args.entity, args.query, args.params, args.directive);
+		}
 	}
 
-	public alias: string | undefined;
+	public aliasFor: string | undefined;
+	public directive: string | undefined;
 	public entity: any | undefined;
+	public params: ParamResolver | undefined;
 	public query: string | undefined;
 
-	constructor(alias?: string, entity?: any, query?: string) {
-		this.alias = alias;
+	constructor(aliasFor?: string, entity?: any, query?: string, params?: any, directive?: string) {
+		this.aliasFor = aliasFor;
+		this.directive = directive;
 		this.entity = entity;
+		this.params = params;
 		this.query = query;
 	}
 

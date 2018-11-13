@@ -11,7 +11,7 @@
       "sourceMap": true,
       "jsx": "react",
       "experimentalDecorators": true,
-		  "emitDecoratorMetadata": true,
+      "emitDecoratorMetadata": true
     },
     "include": [
       "./src/**/*.ts",

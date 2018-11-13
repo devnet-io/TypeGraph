@@ -1,6 +1,6 @@
 {
   "name": "typegraph",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "author": "Joe Esposito <joe@devnet.io>",
   "description": "Generate GraphQL queries with TypeScript decorators",
   "main": "dist/index.js",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/devnet-io/TypeGraph#readme",
   "dependencies": {
     "lodash": "^4.17.0",
-    "graphqlify": "1.1.0"
+    "json-to-graphql-query": "^1.9.0"
   },
   "devDependencies": {
     "@types/jest": "20.0.8",
@@ -55,6 +55,13 @@
     "transform": {
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "spec.*\\.(ts|tsx|js|jsx)$"
+    "testRegex": "spec.*\\.(ts|tsx|js|jsx)$",
+    "globals": {
+      "ts-jest": {
+        "tsConfig": {
+            "experimentalDecorators": true
+        }
+      }
+    }
   }
 }

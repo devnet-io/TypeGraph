@@ -1,29 +1,36 @@
-import graphqlify from 'graphqlify';
+import { jsonToGraphQLQuery } from "json-to-graphql-query";
 
+import { IField } from "../decorators/field/IField";
 import Class from '../util/Class';
 import Logger from '../util/Logger';
-import { currentMode } from "../util/Mode";
+import { findVariables, getParams, isValidParams } from "../util/Params";
 import { iDef, nDef } from '../util/TypeUtils';
 
 /**
  * Core functionality of the library.
  * For full documentation: {@link https://www.devnet.io/libs/TypeGraph/}
- * 
+ *
  * @author Joe Esposito <joe@devnet.io>
  */
 
 export const QUERY: string = "__query__";
 
-export enum QueryType { 
-	ONE = "one", 
+// properties for json-to-graphql-query
+const ALIAS_FOR: string = "__aliasFor";
+const ARGS: string = "__args";
+const DIRECTIVES: string = "__directives";
+const VARIABLES: string = "__variables";
+
+export enum QueryType {
+	ONE = "one",
 	MANY = "many",
 	INLINE = "inline"
 }
 
-export enum MutationType { 
-	CREATE = "create", 
-	UPDATE = "update", 
-	DELETE = "delete" 
+export enum MutationType {
+	CREATE = "create",
+	UPDATE = "update",
+	DELETE = "delete"
 }
 
 export const setupQuery = (cls: any) => {
@@ -34,85 +41,130 @@ export const setupQuery = (cls: any) => {
 	return false;
 };
 
-export const generateMutation = (clazz: Class, type: MutationType, fields: object, params?: object, alias?: string): string => {
-	const instance = new clazz();
+export const isValidInstance = (instance: any) => (typeof instance === 'object' && typeof instance[QUERY] === 'object');
 
-	if(Object.values(MutationType).indexOf(type) < 0) {
-		Logger.throw("invalid.mutation");
+/**
+ * parse a field
+ * @param field
+ * @param paramData
+ * @param paramCallback
+ * @param depth
+ * @returns object with json-to-graphql-query properties
+ */
+const parseField = (field: IField, paramData: object, paramCallback: (params: any) => void, depth: number = 0) => {
+
+	// schema object for field
+	const f: any = {};
+
+	// 1. add the directive name if specified (lib only supports one directive per field at the moment)
+	if (typeof field.directive === 'string') {
+		f[DIRECTIVES] = { [field.directive]:  true };
 	}
 
-	if (typeof instance === 'object' && typeof instance[QUERY] === 'object') {
-		const args = instance[QUERY] as any;
-		const name = iDef(alias) ? alias + ":" + args[type] : args[type];
-
-		// construct the query
-		const query = {
-			[name] : { 
-				fields
-			}
-		} as any;
-
-		// add the params if received
-		if (iDef(params)) {
-			query[name].params = params;
+	// 2. add the params, if any specified
+	if (isValidParams(field.params)) {
+		const fieldParams = getParams<any, any>(field.params, paramData);
+		if (Object.keys(fieldParams).length > 0) {
+			f[ARGS] = fieldParams;
+			paramCallback(fieldParams);
 		}
+	}
 
-		// pass it graphqlify then prefix
-		return "mutation" + graphqlify(query);
+	// 3. add alias information
+ if (iDef(field.aliasFor)) {
+		f[ALIAS_FOR] = field.aliasFor;
+	}
+
+	// 4. if the field references another entity, add all of the entity fields to this object
+	if (typeof field.entity !== 'undefined') {
+
+		const instance = new field.entity();
+
+		if (isValidInstance(instance)) {
+			const args = instance[QUERY];
+			depth++;
+
+			args.fields.forEach((subfield: IField) => {
+				f[subfield.name] = parseField(subfield, paramData, paramCallback, depth);
+			});
+		}
+	}
+
+	// 5. return the field schema object or just a boolean if no fields were added
+	return Object.keys(f).length > 0 ? f : true;
+};
+
+/**
+ * should return:
+ * {
+ *  [aliasOrName]: {
+ *    ...entityFields
+ *  }
+ * }
+ */
+const setupSchema = (entityName: string, entity: Class, paramData: object, alias?: string) => {
+	const instance = new entity();
+
+	if (isValidInstance(instance)) {
+		const args = instance[QUERY];
+		const schema: any = {};
+		const variables: any = {};
+
+		// 1. determine the root field args
+		const name: string = iDef(alias) ? alias : entityName;
+		const aliasFor: string | undefined = iDef(alias) ? entityName : undefined; // this is the reverse of how it works in @Field
+		const params = args.params;
+
+		// 2. set up the entity as a field on the schema
+	 schema[name] = parseField({aliasFor, entity, name, params}, paramData || {},
+				(fieldParams: any) => findVariables(fieldParams, (variable) => {
+					const variableType  = variable.getTypeString();
+
+					if (iDef(variables[variable.value]) && variables[variable.value] !== variableType) {
+						Logger.throw("duplicate.variable");
+					}
+
+					variables[variable.value] = variableType;
+				}));
+
+
+			// 3. if there are any variables, add to the schema
+	 if (Object.keys(variables).length > 0) {
+					schema[VARIABLES] = variables;
+				}
+
+		// 4. return the schema
+	 return schema;
+	}
+};
+
+export const generateQuery = (clazz: Class, type: QueryType, paramData?: object, alias?: string) => {
+	const instance = new clazz();
+
+	if (Object.values(QueryType).indexOf(type) < 0) {
+		Logger.throw("invalid.query");
+	}
+
+	if (isValidInstance(instance)) {
+		return jsonToGraphQLQuery({
+			query: setupSchema(instance[QUERY][type], clazz, paramData, alias)
+		});
 	}
 
 	Logger.throw("invalid.class");
 };
 
-export const generateQuery = (clazz: Class, type: QueryType, params?: object, alias?: string, depth: number = 0): string => {
+export const generateMutation = (clazz: Class, type: MutationType, paramData?: object, alias?: string) => {
 	const instance = new clazz();
-	let query: any = { fields: { } as any};
-	depth++;
 
-	if(Object.values(QueryType).indexOf(type) < 0) {
-		Logger.throw("invalid.query");
+	if (Object.values(MutationType).indexOf(type) < 0) {
+		Logger.throw("invalid.mutation");
 	}
 
-	if (typeof instance === 'object' && typeof instance[QUERY] === 'object') {
-		const args = instance[QUERY] as any;
-
-		if (iDef(params)) {
-			query.params = params;
-		}
-
-		// loop through decorated fields
-		args.fields.forEach((f: any) => {
-
-			if (depth < 10 || typeof f.entity === 'undefined') {
-
-				if (typeof f.entity !== 'undefined') {
-					query.fields[f.name] = generateQuery(f.entity, QueryType.INLINE, undefined, undefined, depth);
-				} else {
-					query.fields[f.name] = {};
-				}
-
-			} else {
-				console.warn("Maximum query depth exceeded");
-			}
+	if (isValidInstance(instance)) {
+		return jsonToGraphQLQuery({
+			mutation: setupSchema(instance[QUERY][type], clazz, paramData, alias)
 		});
-
-		/* if(iDef(alias)) {
-			query.field = alias;
-		} */
-
-		if (QueryType.INLINE === type) {
-			// keep as object for use in parent query
-			return query;
-		}
-
-		// alias the query if needed
-		const name = iDef(alias) ? alias + ":" + args[type] : args[type];
-
-		// create the final query object
-		query = { [name]: query };
-
-		// pass it graphqlify then prefix
-		return "query" + graphqlify(query);
 	}
 
 	Logger.throw("invalid.class");
