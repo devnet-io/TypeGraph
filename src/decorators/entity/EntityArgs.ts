@@ -17,7 +17,7 @@ export default class EntityArgs {
 		const errors = Object.keys(args).reduce((previous, field) => {
 
 			// params is allowed
-			if (field === "params" && isValidParams(args[field])) {
+			if (field === "params") {
 				return previous;
 			}
 
@@ -55,7 +55,7 @@ export default class EntityArgs {
 	public create?: string | undefined;
 	public update?: string | undefined;
 	public delete?: string | undefined;
-	public params?: ParamResolver | undefined;
+	public params?: ParamResolver | boolean | undefined;
 
 	constructor(one?: string, many?: string, params?: ParamResolver) {
 		this.one = one;

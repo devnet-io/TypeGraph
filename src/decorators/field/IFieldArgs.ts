@@ -12,6 +12,6 @@ export interface IFieldArgs<Params = {}, QueryParams = {}> {
 	aliasFor?: string;
 	directive?: string;
 	entity?: Class;
-	params?: ParamResolver<Params, QueryParams>;
+	params?: ParamResolver<Params, QueryParams> | boolean;
 	query ?: string;
 }

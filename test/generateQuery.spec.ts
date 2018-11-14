@@ -113,6 +113,22 @@ class NestedVariableClass {
 	public id: number;
 }
 
+@Entity({one: "defaultRootParams", params: true})
+class DefaultRootParams {
+
+	@Field()
+	public id: number;
+
+}
+
+@Entity({one: "noRootParams", params: false})
+class NoRootParams {
+
+	@Field()
+	public id: number;
+
+}
+
 describe("Query Generator", () => {
 	it("query one", () => {
 
@@ -200,6 +216,21 @@ describe("Query Generator", () => {
 		const queryNestedVariables = generateQuery(NestedVariableClass, QueryType.ONE);
 		console.log(queryNestedVariables);
 		expect(queryNestedVariables).toEqual("query ($var1: String!) { nestedVariableClass (data: {myParam: $var1}) { id } }");
+	});
+
+ it("query one add paramData to root entity by default", () => {
+
+		const query = generateQuery(DefaultRootParams, QueryType.ONE, {params: {sort: "-n"}});
+		console.log(query);
+		expect(query).toEqual("query { defaultRootParams (params: {sort: \"-n\"}) { id } }");
+	});
+
+ it("query one no default params if entity params === false", () => {
+
+		const query = generateQuery(NoRootParams, QueryType.ONE, {params: {one: 1}});
+		console.log(query);
+		expect(query).toEqual("query { noRootParams { id } }");
+
 	});
 
 	it("invalid class throws error", () => {

@@ -113,12 +113,12 @@ const setupSchema = (entityName: string, entity: Class, paramData: object, alias
 		// 1. determine the root field args
 		const name: string = iDef(alias) ? alias : entityName;
 		const aliasFor: string | undefined = iDef(alias) ? entityName : undefined; // this is the reverse of how it works in @Field
-		const params = args.params;
+		const params = args.params === false ? {} : (isValidParams(args.params) ? args.params : paramData || {});
 
 		// 2. set up the entity as a field on the schema
 	 schema[name] = parseField({aliasFor, entity, name, params}, paramData || {},
 				(fieldParams: any) => findVariables(fieldParams, (variable) => {
-					const variableType  = variable.getTypeString();
+					const variableType = variable.getTypeString();
 
 					if (iDef(variables[variable.value]) && variables[variable.value] !== variableType) {
 						Logger.throw("duplicate.variable");

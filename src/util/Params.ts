@@ -11,7 +11,7 @@ function callParams<P, V>(params: ParamsFn<P, V>, val: V): P {
 	return params(val);
 }
 
-export function getParams<P, V = {}>(params: ParamResolver<P, V>, queryParams: V): P {
+export function getParams<P, V = {}>(params: ParamResolver<P, V> | boolean, queryParams: V): P {
 	if (typeof params === 'function') {
 		return callParams(params as ParamsFn<P, V>, queryParams);
 	}

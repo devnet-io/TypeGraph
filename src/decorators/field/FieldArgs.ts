@@ -16,7 +16,12 @@ export default class FieldArgs implements IFieldArgs {
 			(typeof args.aliasFor === 'undefined' || typeof args.aliasFor === 'string') &&
 			(typeof args.directive === 'undefined' || typeof args.directive === 'string') &&
 			(typeof args.entity === 'undefined' || typeof args.entity === 'function') &&
-			(typeof args.params === 'undefined' || typeof args.params === 'object' || typeof args.params === 'function') &&
+			(
+				typeof args.params === 'undefined' ||
+				typeof args.params === 'boolean' ||
+				typeof args.params === 'object' ||
+				typeof args.params === 'function'
+			) &&
 			(typeof args.query === 'undefined' || typeof args.query === 'string')
 		));
 	}
