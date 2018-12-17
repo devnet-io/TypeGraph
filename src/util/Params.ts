@@ -23,6 +23,10 @@ export function isValidParams(params: any): boolean {
 }
 
 export function findVariables(params: any, callback: (v: VariableModel) => void) {
+	if (typeof params !== 'object') {
+		return false;
+	}
+
 	Object.entries(params).forEach(([_, v]) => {
 		if (typeof v === 'object') {
 			if (v instanceof VariableModel) {
