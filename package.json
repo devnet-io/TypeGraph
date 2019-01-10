@@ -1,6 +1,6 @@
 {
   "name": "typegraph",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Joe Esposito <joe@devnet.io>",
   "description": "Generate GraphQL queries with TypeScript decorators",
   "main": "dist/index.js",

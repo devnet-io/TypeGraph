@@ -129,6 +129,12 @@ class NoRootParams {
 
 }
 
+@Entity({one: "nullParams", params: { stuff: null }})
+class NullParams {
+	@Field()
+	public id: number;
+}
+
 describe("Query Generator", () => {
 	it("query one", () => {
 
@@ -247,6 +253,10 @@ describe("Query Generator", () => {
 
  it("duplicate variables throw error if type information isn't exactly the same", () => {
 		expect(() => generateQuery(Employee2, QueryType.MANY)).toThrow();
+	});
+
+ it ("correctly checks typeof null", () => {
+		expect(generateQuery(NullParams, QueryType.ONE)).toEqual("query { nullParams (stuff: null) { id } }");
 	});
 
 });

@@ -23,7 +23,7 @@ export function isValidParams(params: any): boolean {
 }
 
 export function findVariables(params: any, callback: (v: VariableModel) => void) {
-	if (typeof params !== 'object') {
+	if (!params || typeof params !== 'object') {
 		return false;
 	}
 
