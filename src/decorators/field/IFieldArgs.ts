@@ -13,5 +13,6 @@ export interface IFieldArgs<Params = {}, QueryParams = {}> {
 	directive?: string;
 	entity?: Class;
 	params?: ParamResolver<Params, QueryParams> | boolean;
+	includeIf?: (paramData: any) => boolean;
 	query ?: string;
 }

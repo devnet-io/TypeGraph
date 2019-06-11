@@ -56,6 +56,11 @@ const parseField = (field: IField, paramData: object, paramCallback: (params: an
 	// schema object for field
 	const f: any = {};
 
+	// don't include this field
+ if (typeof field.includeIf === 'function' && !field.includeIf(paramData)) {
+		return false;
+	}
+
 	// 1. add the directive name if specified (lib only supports one directive per field at the moment)
 	if (typeof field.directive === 'string') {
 		f[DIRECTIVES] = { [field.directive]:  true };

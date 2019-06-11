@@ -13,7 +13,7 @@ import { IFieldArgs } from './IFieldArgs';
 
 
 const Field = (args?: IFieldArgs) => {
-	const { aliasFor, directive, entity, params, query } = FieldArgs.parseArgs(args);
+	const { aliasFor, directive, entity, includeIf, params, query } = FieldArgs.parseArgs(args);
 
 	return (cls: any, property: string) => {
 		setupQuery(cls);
@@ -22,6 +22,7 @@ const Field = (args?: IFieldArgs) => {
 			name: property,
 			directive,
 			entity,
+			includeIf,
 			params,
 			query
 		} as IField);

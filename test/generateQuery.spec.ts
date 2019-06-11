@@ -135,6 +135,17 @@ class NullParams {
 	public id: number;
 }
 
+@Entity({one: "excludeName", params: false})
+class ExcludeName {
+
+	@Field()
+	public id: string;
+
+	@Field({includeIf: (params) => !!params.includeName})
+	public name: string;
+}
+
+
 describe("Query Generator", () => {
 	it("query one", () => {
 
@@ -257,6 +268,11 @@ describe("Query Generator", () => {
 
  it ("correctly checks typeof null", () => {
 		expect(generateQuery(NullParams, QueryType.ONE)).toEqual("query { nullParams (stuff: null) { id } }");
+	});
+
+ it("excludes a field if includeIf evaluates to false", () => {
+
+		expect(generateQuery(ExcludeName, QueryType.ONE, {includeName: false})).toEqual("query { excludeName { id } }");
 	});
 
 });

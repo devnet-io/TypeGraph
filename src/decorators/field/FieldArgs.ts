@@ -22,6 +22,9 @@ export default class FieldArgs implements IFieldArgs {
 				typeof args.params === 'object' ||
 				typeof args.params === 'function'
 			) &&
+			(
+				typeof args.includeIf === 'undefined' || typeof args.includeIf === 'function'
+			) &&
 			(typeof args.query === 'undefined' || typeof args.query === 'string')
 		));
 	}
@@ -37,22 +40,24 @@ export default class FieldArgs implements IFieldArgs {
 		}
 
 		if (typeof args === 'object') {
-			return new FieldArgs(args.aliasFor, args.entity, args.query, args.params, args.directive);
+			return new FieldArgs(args.aliasFor, args.entity, args.query, args.params, args.directive, args.includeIf);
 		}
 	}
 
 	public aliasFor: string | undefined;
 	public directive: string | undefined;
 	public entity: any | undefined;
+	public includeIf: undefined | ((paramData: any) => boolean);
 	public params: ParamResolver | undefined;
 	public query: string | undefined;
 
-	constructor(aliasFor?: string, entity?: any, query?: string, params?: any, directive?: string) {
+	constructor(aliasFor?: string, entity?: any, query?: string, params?: any, directive?: string, includeIf?: any) {
 		this.aliasFor = aliasFor;
 		this.directive = directive;
 		this.entity = entity;
 		this.params = params;
 		this.query = query;
+	 this.includeIf = includeIf;
 	}
 
 	public isValid(): boolean {
