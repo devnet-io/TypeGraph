@@ -17,10 +17,8 @@
 			]
 		},
 		"indent": [
-			true,
-			"tabs",
-			2
-		],
+      true
+    ],
 		"quotemark": false,
 		"no-trailing-whitespace": false,
 		"max-line-length": false,

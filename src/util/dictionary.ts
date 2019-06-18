@@ -17,6 +17,9 @@ const dictionary: any = {
 		query: "Invalid QueryType provided to generateQuery. See: https://www.devnet.io/libs/TypeGraph/ for valid types.",
 		mutation: "Invalid MutationType provided to generateMutation. See: https://www.devnet.io/libs/TypeGraph/ for valid types.",
 		class: "Invalid class supplied. Is it decorated with @Entity and at least one @Field?"
+	},
+	warning: {
+		operation: "No Operation decorator metadata found on class. Defaulting to Query."
 	}
 };
 
