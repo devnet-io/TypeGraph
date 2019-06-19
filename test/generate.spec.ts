@@ -32,7 +32,7 @@ class Doge {
   public name: string;
 }
 
-@Operation.Query()
+@Operation({type: "query"})
 class GetMultipleThings {
 
   @Field({entity: Company, params: {pageSize: addVariable('pageSize', 'Int', false, 10)}})
@@ -43,7 +43,7 @@ class GetMultipleThings {
 
 }
 
-@Operation.Mutation({name: "MyMutation"})
+@Operation({type: "mutation", name: "MyMutation"})
 class MutateStuff {
 
   @Field({

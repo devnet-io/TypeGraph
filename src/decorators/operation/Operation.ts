@@ -10,7 +10,3 @@ export default function Operation(args: IOperationArgs) {
 		return cls;
 	};
 }
-
-Operation.Query = (options: IOperationOptions = {}) => Operation({...options, type: 'query'});
-Operation.Mutation = (options: IOperationOptions = {}) => Operation({...options, type: 'mutation'});
-Operation.Subscription = (options: IOperationOptions = {}) => Operation({...options, type: 'subscription'});
