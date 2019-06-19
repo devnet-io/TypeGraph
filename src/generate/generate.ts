@@ -160,7 +160,7 @@ function __generate(
  * @param clazz root graphql query class
  * @param data external data object for evaluating param resolvers
  */
-function generate(clazz: Class, data: object): string {
+const root = (clazz: Class, data: object): string => {
 
   const instance = new clazz();
 
@@ -169,7 +169,7 @@ function generate(clazz: Class, data: object): string {
   const { type = "query", name = clazz.name } = operation;
 
   return __generate(type, data, fields, name);
-}
+};
 
 
 interface IFieldMeta {
@@ -187,16 +187,16 @@ interface IFieldMeta {
  * @param name operation name (optional)
  * @returns generated graphql query string
  **/
-generate.query = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
+const query = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
   return __generate("query", data, [{...field, entity}], name);
 };
 
-generate.mutation = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
+const mutation = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
   return __generate("mutation", data, [{...field, entity}], name);
 };
 
-generate.subscription = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
+const subscription = (entity: Class, data: object, field: IFieldMeta, name?: string) => {
   return __generate("subscription", data, [{...field, entity}], name);
 };
 
-export default generate;
+export default { root, query, mutation, subscription };

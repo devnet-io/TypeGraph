@@ -61,12 +61,12 @@ describe("generate", () => {
 
   it("generates a query string with multiple root fields", () => {
 
-    expect(generate(GetMultipleThings, {})).toEqual("query GetMultipleThings ($pageSize: Int = 10) { company_many (pageSize: $pageSize) { id name employees { id name } } doge_one { id name } }");
+    expect(generate.root(GetMultipleThings, {})).toEqual("query GetMultipleThings ($pageSize: Int = 10) { company_many (pageSize: $pageSize) { id name employees { id name } } doge_one { id name } }");
   });
 
   it("generates a mutation with a provided name", () => {
 
-    expect(generate(MutateStuff, {name: "Shibe"})).toEqual("mutation MyMutation ($breed: String!) { doge (name: \"Shibe\", breed: $breed) { id name } }");
+    expect(generate.root(MutateStuff, {name: "Shibe"})).toEqual("mutation MyMutation ($breed: String!) { doge (name: \"Shibe\", breed: $breed) { id name } }");
   });
 
   it("generates a subscription query using the shorthand syntax", () => {
